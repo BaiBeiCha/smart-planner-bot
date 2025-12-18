@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: planner-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: plans_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d plans_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - bot-network
+
+  bot:
+    build: .
+    container_name: planner-bot
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/plans_db
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - bot-network
+
+volumes:
+  postgres_data:
+
+networks:
+  bot-network:
+    driver: bridge
