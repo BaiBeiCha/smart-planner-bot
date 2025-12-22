@@ -67,7 +67,7 @@ class ReminderScheduler:
             except Exception as e:
                 logger.error(f"Error in reminder check loop: {e}")
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(30)
 
     async def process_reminder(self, reminder_id: int, user_id: int):
         try:

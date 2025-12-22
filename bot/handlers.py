@@ -108,13 +108,6 @@ class BotHandlers:
     async def register_city(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         city = update.message.text.strip()
 
-        if not re.match(r'^[a-zA-Z_]{3,20}$', city):
-            await update.message.reply_text(
-                "Имя пользователя должно содержать от 3 до 20 символов (латинские буквы, цифры, _).\n"
-                "Попробуйте еще раз:"
-            )
-            return REGISTRATION_USERNAME
-
         timezone_name = await self.timezone_service.get_timezone_by_city(city)
         if not timezone_name:
             await update.message.reply_text(
